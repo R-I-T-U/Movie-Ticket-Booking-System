@@ -8,10 +8,9 @@ from app.routes import users, admin, auth
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create database tables
     Base.metadata.create_all(bind=engine)
     yield
-    # Clean up (if needed)
+    engine.dispose()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -19,7 +18,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
@@ -28,7 +26,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(users.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
@@ -36,7 +33,3 @@ app.include_router(admin.router, prefix=settings.API_V1_STR)
 @app.get("/")
 async def root():
     return {"message": "Welcome to Movie Ticket Booking System"}
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}

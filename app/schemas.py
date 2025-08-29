@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
 
 # User schemas
@@ -18,7 +18,7 @@ class User(UserBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_arrtibutes = True
 
 # Auth schemas
 class Token(BaseModel):
@@ -44,7 +44,7 @@ class Movie(MovieBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Showtime schemas
 class ShowtimeBase(BaseModel):
@@ -52,7 +52,7 @@ class ShowtimeBase(BaseModel):
     start_time: datetime
     total_seats: int
 
-    @validator('total_seats')
+    @field_validator('total_seats')
     def validate_total_seats(cls, v):
         if v <= 0:
             raise ValueError('Total seats must be greater than 0')
@@ -69,14 +69,14 @@ class Showtime(ShowtimeBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Booking schemas
 class BookingBase(BaseModel):
     showtime_id: int
     seats: int
 
-    @validator('seats')
+    @field_validator('seats')
     def validate_seats(cls, v):
         if v <= 0:
             raise ValueError('Seats must be greater than 0')
@@ -92,7 +92,7 @@ class Booking(BookingBase):
     booking_time: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Response schemas
 class ShowtimeWithMovie(Showtime):

@@ -15,17 +15,14 @@ async def register_user(
     user: schemas.UserCreate,
     db: Session = Depends(get_db)
 ):
-    # Check if username already exists
     db_user = db.query(models.User).filter(models.User.username == user.username).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     
-    # Check if email already exists
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    # Create user
     hashed_password = get_password_hash(user.password)
     db_user = models.User(
         username=user.username,
