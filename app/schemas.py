@@ -2,7 +2,6 @@ from typing import Optional, List
 from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
 
-# User schemas
 class UserBase(BaseModel):
     username: str
     email: EmailStr
@@ -34,6 +33,12 @@ class MovieBase(BaseModel):
     description: Optional[str] = None
     duration: int
     genre: str
+
+    @field_validator('duration', mode='before')
+    def validate_duration(cls, v):
+        if v < 5:
+            raise ValueError('Movie duration must be at least 5 minutes')
+        return v
 
 class MovieCreate(MovieBase):
     pass

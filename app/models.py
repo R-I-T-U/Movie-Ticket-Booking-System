@@ -23,7 +23,7 @@ class Movie(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(100), nullable=False)
     description = Column(Text)
-    duration = Column(Integer, nullable=False)  # in minutes
+    duration = Column(Integer, nullable=False)
     genre = Column(String(50), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

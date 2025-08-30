@@ -33,3 +33,5 @@ A production-ready Movie Ticket Booking System built with FastAPI.
 ```bash
 git clone <repository-url>
 cd movie-ticket-booking
+
+python -m scripts.create_admin

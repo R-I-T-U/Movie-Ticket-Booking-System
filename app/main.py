@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from app.config import settings
 from app.database import engine, Base
-from app.routes import users, admin, auth
+from app.routes import auth, bookings, movies, showtime
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,8 +27,9 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix=settings.API_V1_STR)
-app.include_router(users.router, prefix=settings.API_V1_STR)
-app.include_router(admin.router, prefix=settings.API_V1_STR)
+app.include_router(movies.router, prefix=settings.API_V1_STR)
+app.include_router(showtime.router, prefix=settings.API_V1_STR)
+app.include_router(bookings.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 async def root():
