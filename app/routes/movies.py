@@ -48,6 +48,8 @@ async def update_movie_endpoint(
     current_user: models.User = Depends(get_current_admin_user), 
     db: Session = Depends(get_db)
 ):
+    if movie_id <= 0:
+        raise HTTPException(status_code=400, detail="Invalid movie ID")
     try:
         return update_movie(movie_id, movie, db)
     except HTTPException as e:
@@ -64,6 +66,8 @@ async def delete_movie_endpoint(
     current_user: models.User = Depends(get_current_admin_user), 
     db: Session = Depends(get_db)
 ):
+    if movie_id <= 0:
+        raise HTTPException(status_code=400, detail="Invalid movie ID")
     try:
         result = deactivate_movie(movie_id, db)
         return {"message": "Movie deleted successfully"}

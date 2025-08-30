@@ -1,7 +1,8 @@
-from datetime import timedelta
 from typing import Optional
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, and_
+from fastapi import HTTPException, status
+from datetime import timedelta
 from app import models, schemas
 
 def create_showtime(showtime_data: schemas.ShowtimeCreate, db: Session):
@@ -15,6 +16,40 @@ def create_showtime(showtime_data: schemas.ShowtimeCreate, db: Session):
     
     end_time = showtime_data.start_time + timedelta(minutes=movie.duration)
     
+    # Add buffer time (20 minutes before and after)
+    buffer_before = timedelta(minutes=20)
+    buffer_after = timedelta(minutes=20)
+    
+    # Check for overlapping showtimes in the same cinema hall
+    # Consider buffer time for cleaning and preparation
+    overlapping_showtime = db.query(models.Showtime).filter(
+        models.Showtime.cinema_hall_id == showtime_data.cinema_hall_id,
+        or_(
+            # New showtime starts during existing showtime (with buffer)
+            and_(
+                showtime_data.start_time >= models.Showtime.start_time - buffer_before,
+                showtime_data.start_time < models.Showtime.end_time + buffer_after
+            ),
+            # New showtime ends during existing showtime (with buffer)
+            and_(
+                end_time > models.Showtime.start_time - buffer_before,
+                end_time <= models.Showtime.end_time + buffer_after
+            ),
+            # New showtime completely contains existing showtime
+            and_(
+                showtime_data.start_time <= models.Showtime.start_time - buffer_before,
+                end_time >= models.Showtime.end_time + buffer_after
+            )
+        )
+    ).first()
+    
+    if overlapping_showtime:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cinema hall is already occupied from {overlapping_showtime.start_time} to {overlapping_showtime.end_time}"
+        )
+    
+    # Create the showtime
     db_showtime = models.Showtime(
         **showtime_data.model_dump(),
         end_time=end_time,
@@ -65,6 +100,7 @@ def get_showtimes(db: Session, movie_id: Optional[int] = None, skip: int = 0, li
         query = query.filter(models.Showtime.movie_id == movie_id)
     
     showtimes = query.offset(skip).limit(limit).all()
+
     return showtimes
 
 def delete_showtime(showtime_id: int, db: Session):

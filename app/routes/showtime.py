@@ -35,6 +35,8 @@ async def update_showtime_endpoint(
     current_user: models.User = Depends(get_current_admin_user), 
     db: Session = Depends(get_db)
 ):
+    if showtime_id <= 0:
+        raise HTTPException(status_code=400, detail="Invalid showtime ID")
     db_showtime = update_showtime(showtime_id, showtime_data, db)
     return db_showtime  
 
@@ -44,5 +46,7 @@ async def delete_showtime_endpoint(
     current_user: models.User = Depends(get_current_admin_user),
     db: Session = Depends(get_db)
 ):
+    if showtime_id <= 0:
+        raise HTTPException(status_code=400, detail="Invalid showtime ID")
     result = delete_showtime(showtime_id, db)
     return {"message": "Showtime deleted successfully"}

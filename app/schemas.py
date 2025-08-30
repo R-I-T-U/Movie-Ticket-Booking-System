@@ -1,14 +1,35 @@
+import re
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr, field_validator
-from datetime import datetime
+from datetime import datetime, timezone
 
+# User schemas
 class UserBase(BaseModel):
     username: str
     email: EmailStr
     full_name: str
 
+    @field_validator('username', 'full_name', mode='before')
+    def validate_non_empty(cls, v, field):
+        if not v or not v.strip():
+            raise ValueError(f'{field.name.capitalize()} cannot be empty')
+        return v
+
 class UserCreate(UserBase):
     password: str
+
+    @field_validator('password', mode='before')
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain at least one number")
+        return v
+
 
 class User(UserBase):
     id: int
@@ -17,7 +38,7 @@ class User(UserBase):
     created_at: datetime
 
     class Config:
-        from_arrtibutes = True
+        from_attributes = True
 
 # Auth schemas
 class Token(BaseModel):
@@ -34,12 +55,30 @@ class MovieBase(BaseModel):
     duration: int
     genre: str
 
+    @field_validator('title', mode='before')
+    def validate_title_non_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Title cannot be empty')
+        return v
+    
+    @field_validator('genre', mode='before')
+    def validate_genre_non_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Genre cannot be empty')
+        return v
+
+    @field_validator('description', mode='before')
+    def validate_description(cls, v):
+        if v is not None and not v.strip():
+            raise ValueError('Description cannot be empty')
+        return v
+
     @field_validator('duration', mode='before')
     def validate_duration(cls, v):
         if v < 5:
             raise ValueError('Movie duration must be at least 5 minutes')
         return v
-
+    
 class MovieCreate(MovieBase):
     pass
 
@@ -61,6 +100,12 @@ class ShowtimeBase(BaseModel):
     def validate_total_seats(cls, v):
         if v <= 0:
             raise ValueError('Total seats must be greater than 0')
+        return v
+
+    @field_validator('start_time')
+    def validate_start_time(cls, v):
+        if v < datetime.now(timezone.utc):
+            raise ValueError('Showtime time cannot be in the past')
         return v
 
 class ShowtimeCreate(ShowtimeBase):
