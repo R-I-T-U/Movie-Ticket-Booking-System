@@ -49,16 +49,18 @@ Ensure you have the following installed before setting up:
    pip install -r requirements/base.txt
    ```
 
-4. Set up environment variables:  
+4. Set up environment variables:
+   ```bash 
    echo "DATABASE_URL=postgresql://your_username:your_password@localhost:5432/movie_booking" > .env
+   ```
 - Replace your_username and your_password with your actual data
    
-6. Run database migrations:
+5. Run database migrations:
     ```bash
     alembic upgrade head
     ```
 
-7. Create an admin user:
+6. Create an admin user:
     ```bash
     python -m scripts.create_admin
     ```
@@ -74,7 +76,7 @@ Ensure you have the following installed before setting up:
    fastapi dev app/main.py
    ```
 
-3. Access the backend:  
+2. Access the backend:  
 - API Base URL: http://localhost:8000  
 - Swagger Documentation: http://localhost:8000/docs
 
