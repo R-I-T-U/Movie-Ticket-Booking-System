@@ -85,3 +85,9 @@ Ensure you have the following installed before setting up:
   ```
   Then open your browser and visit:
   http://localhost:3000 
+
+---
+
+# Note
+
+Frontend designers are welcome to create their own frontend and integrate it with this backend. This project focuses solely on the backend functionality.
