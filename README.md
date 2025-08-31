@@ -26,11 +26,11 @@ Ensure you have the following installed before setting up:
 ## ⚙️ Setup and Installation
 
 1. Clone the repository:
-2. ```bash
+   ```bash
    git clone https://github.com/R-I-T-U/Movie-Ticket-Booking-System.git  
    cd Movie-Ticket-Booking-System
    ```
-3. Create a virtual environment (recommended):
+2. Create a virtual environment (recommended):
 
    For Linux/Mac:
    ```bash
@@ -44,20 +44,21 @@ Ensure you have the following installed before setting up:
    source venv\Scripts\activate
    ```
 
-5. Install dependencies:
+3. Install dependencies:
    ```bash
    pip install -r requirements/base.txt
    ```
 
-6. Set up environment variables:  
-   DATABASE_URL=your_database_url
+4. Set up environment variables:  
+   echo "DATABASE_URL=postgresql://your_username:your_password@localhost:5432/movie_booking" > .env
+- Replace your_username and your_password with your actual data
    
-9. Run database migrations:
+6. Run database migrations:
     ```bash
     alembic upgrade head
     ```
 
-11. Create an admin user:
+7. Create an admin user:
     ```bash
     python -m scripts.create_admin
     ```
@@ -67,6 +68,8 @@ Ensure you have the following installed before setting up:
 ## ▶️ Steps to Run the Application
 
 1. Start the FastAPI server:
+- Make sure you are in the Movie-Ticket-Booking-System directory in your terminal.
+- Make sure your virtual environment is activated (if you have one set up).
    ```bash
    fastapi dev app/main.py
    ```
@@ -76,47 +79,10 @@ Ensure you have the following installed before setting up:
 - Swagger Documentation: http://localhost:8000/docs
 
 3. Access the frontend:  
--http://localhost:5500/frontend/index.html
-
----
-
-## Python Version and Libraries Used
-
-### Python Version
-- Python 3.8+
-
-### Core Libraries
-- FastAPI: Web framework
-- SQLAlchemy: ORM for database operations
-- python-dotenv: Environment variable management
-- Werkzeug: Password hashing and security utilities
-
-### Development Libraries
-- pytest: Testing framework
-- Faker: Test data generation
-- HTTPX: HTTP client for testing
-
----
-
-## 🚀 Deployment Instructions
-
-### Deploy Locally with Uvicorn
-1. Ensure all dependencies are installed:  
-pip install -r requirements/base.txt
-
-2. Run database migrations:  
-alembic upgrade head
-
-3. Start the FastAPI application:  
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-
-4. Access the application:  
-- API Base URL: http://127.0.0.1:8000  
-- API Docs: http://127.0.0.1:8000/docs
-
-
----
-
-## 🙌 Acknowledgments
-
-Special thanks to all contributors and the open-source community for their support in building this project.
+- Option 1: Simply run the HTML file by Live Server or open the file directly in your browser.
+- Option 2: Run an HTTP server on port 3000 using this command:
+  ```bash
+  python -m http.server 3000
+  ```
+  Then open your browser and visit:
+  http://localhost:3000 
