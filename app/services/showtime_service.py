@@ -16,29 +16,23 @@ def create_showtime(showtime_data: schemas.ShowtimeCreate, db: Session):
     
     end_time = showtime_data.start_time + timedelta(minutes=movie.duration)
     
-    # Add buffer time (20 minutes before and after)
-    buffer_before = timedelta(minutes=20)
-    buffer_after = timedelta(minutes=20)
-    
-    # Check for overlapping showtimes in the same cinema hall
-    # Consider buffer time for cleaning and preparation
+    # Check for overlapping showtimes
     overlapping_showtime = db.query(models.Showtime).filter(
-        models.Showtime.cinema_hall_id == showtime_data.cinema_hall_id,
         or_(
-            # New showtime starts during existing showtime (with buffer)
+            # New showtime starts during an existing showtime
             and_(
-                showtime_data.start_time >= models.Showtime.start_time - buffer_before,
-                showtime_data.start_time < models.Showtime.end_time + buffer_after
+                showtime_data.start_time >= models.Showtime.start_time,
+                showtime_data.start_time < models.Showtime.end_time
             ),
-            # New showtime ends during existing showtime (with buffer)
+            # New showtime ends during an existing showtime
             and_(
-                end_time > models.Showtime.start_time - buffer_before,
-                end_time <= models.Showtime.end_time + buffer_after
+                end_time > models.Showtime.start_time,
+                end_time <= models.Showtime.end_time
             ),
-            # New showtime completely contains existing showtime
+            # New showtime completely overlaps an existing showtime
             and_(
-                showtime_data.start_time <= models.Showtime.start_time - buffer_before,
-                end_time >= models.Showtime.end_time + buffer_after
+                showtime_data.start_time <= models.Showtime.start_time,
+                end_time >= models.Showtime.end_time
             )
         )
     ).first()
@@ -46,7 +40,7 @@ def create_showtime(showtime_data: schemas.ShowtimeCreate, db: Session):
     if overlapping_showtime:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Cinema hall is already occupied from {overlapping_showtime.start_time} to {overlapping_showtime.end_time}"
+            detail=f"A showtime already exists from at that timeframe"
         )
     
     # Create the showtime
@@ -90,27 +84,33 @@ def update_showtime(showtime_id: int, showtime_data: schemas.ShowtimeCreate, db:
     db.refresh(db_showtime)
     return db_showtime 
 
-def get_showtimes(db: Session, movie_id: Optional[int] = None, skip: int = 0, limit: int = 100):
-    query = db.query(models.Showtime).join(models.Movie).filter(
-        models.Showtime.is_active == True,
-        models.Movie.is_active == True
-    )
+def get_showtime(db: Session, showtime_id: int, is_admin: bool = False):
+    query = db.query(models.Showtime)
     
-    if movie_id:
-        query = query.filter(models.Showtime.movie_id == movie_id)
+    if not is_admin:
+        query = query.filter(
+            models.Showtime.is_active == True
+        )
     
-    showtimes = query.offset(skip).limit(limit).all()
+    showtime = query.filter(models.Showtime.id == showtime_id).first()
+    return showtime
 
-    return showtimes
+def get_all_showtimes(db: Session, skip: int = 0, limit: int = 100, is_admin: bool = False):
+    query = db.query(models.Showtime)
+    
+    if not is_admin:
+        query = query.filter(models.Showtime.is_active == True)
+    
+    return query.offset(skip).limit(limit).all()
 
-def delete_showtime(showtime_id: int, db: Session):
+def deactivate_showtime(showtime_id: int, db: Session):
     db_showtime = db.query(models.Showtime).filter(models.Showtime.id == showtime_id).first()
     
     if not db_showtime:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Showtime not found")
     
     active_booking_exists = any(
-        booking.status == "confirmed" for booking in db_showtime.bookings
+        booking.status == "completed" for booking in db_showtime.bookings
     )
     
     if active_booking_exists:
@@ -120,6 +120,25 @@ def delete_showtime(showtime_id: int, db: Session):
         )
 
     db_showtime.is_active = False
+    db.commit()
+    
+    return db_showtime
+
+def delete_showtime(showtime_id: int, db: Session):
+    db_showtime = db.query(models.Showtime).filter(models.Showtime.id == showtime_id).first()
+    
+    if not db_showtime:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Showtime not found")
+    
+    active_booking_exists = bool(db_showtime.bookings)
+    
+    if active_booking_exists:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete showtime. There are bookings for it."
+        )
+
+    db.delete(db_showtime)
     db.commit()
     
     return db_showtime

@@ -52,7 +52,7 @@ class Booking(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     showtime_id = Column(Integer, ForeignKey("showtimes.id"), nullable=False)
     seats = Column(Integer, nullable=False)
-    status = Column(String(20), default="confirmed")
+    status = Column(String(20), default="completed")
     booking_time = Column(DateTime(timezone=True), server_default=func.now())
     
     user = relationship("User", back_populates="bookings")

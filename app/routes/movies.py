@@ -4,21 +4,21 @@ from typing import List
 
 from app import models, schemas
 from app.database import get_db
-from app.auth import get_current_admin_user  
+from app.auth import get_current_admin_user, get_current_user  
 from app.services.movie_service import get_movies, get_movie, create_movie, update_movie, deactivate_movie
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
 @router.get("", response_model=List[schemas.Movie])  
-async def get_movies_list(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return get_movies(db, skip=skip, limit=limit)
+async def get_movies_list(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    return get_movies(db, skip=skip, limit=limit, is_admin=current_user.is_admin)
 
 @router.get("/{movie_id}", response_model=schemas.Movie)
-async def get_movie_detail(movie_id: int, db: Session = Depends(get_db)):
+async def get_movie_detail(movie_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     if movie_id <= 0:
         raise HTTPException(status_code=400, detail="Invalid movie ID")
     
-    db_movie = get_movie(movie_id, db)
+    db_movie = get_movie(movie_id, db, is_admin=current_user.is_admin)
     
     if not db_movie:
         raise HTTPException(status_code=404, detail="Movie not found")
