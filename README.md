@@ -81,7 +81,7 @@ Ensure you have the following installed before setting up:
 - Swagger Documentation: http://localhost:8000/docs
 
 3. Access the frontend:  
-- Option 1: Simply run the HTML file by Live Server or open the file directly in your browser.
+- Option 1: Simply run the HTML file by Live Server or open the file directly in your browser (frontend/index.html).
   
 - Option 2: Run an HTTP server on port 3000 using this command:
   ```bash
