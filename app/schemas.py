@@ -92,7 +92,7 @@ class Movie(MovieBase):
 
 # Showtime schemas
 class ShowtimeBase(BaseModel):
-    id: int
+    movie_id: int
     start_time: datetime
     total_seats: int
 
@@ -112,7 +112,7 @@ class ShowtimeCreate(ShowtimeBase):
     pass
 
 class Showtime(ShowtimeBase):
-    movie_id: int
+    id: int
     end_time: datetime
     available_seats: int
     is_active: bool
@@ -123,7 +123,7 @@ class Showtime(ShowtimeBase):
 
 # Booking schemas
 class BookingBase(BaseModel):
-    id: int
+    showtime_id: int
     seats: int
 
     @field_validator('seats')
@@ -136,7 +136,7 @@ class BookingCreate(BookingBase):
     pass
 
 class Booking(BookingBase):
-    showtime_id: int
+    id: int
     user_id: int
     status: str
     booking_time: datetime
