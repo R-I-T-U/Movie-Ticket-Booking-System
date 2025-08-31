@@ -1,12 +1,12 @@
 # 🎬 Movie Ticket Booking System
 
-A **Movie Ticket Booking System** built with **FastAPI**. This system allows users to browse movies, book tickets, and provides an admin panel to manage listings.
+A **Movie Ticket Booking System** built with **FastAPI**. This system allows users to browse movies, book tickets, and provides an admin panel to manage movies and showtimes.
 
 ---
 
 ## ✨ Features
 
-- 🔑 User authentication & admin creation
+- 🔑 User authentication
 - 🎥 Manage movies & showtimes
 - 🎟 Ticket booking system
 - ⚡ FastAPI backend with auto-generated API documentation (`/docs`)
