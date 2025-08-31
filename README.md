@@ -1,6 +1,6 @@
 # 🎬 Movie Ticket Booking System
 
-A production-ready **Movie Ticket Booking System** built with **FastAPI**. This system allows users to browse movies, book tickets, and provides an admin panel to manage listings.
+A **Movie Ticket Booking System** built with **FastAPI**. This system allows users to browse movies, book tickets, and provides an admin panel to manage listings.
 
 ---
 
@@ -26,48 +26,61 @@ Ensure you have the following installed before setting up:
 ## ⚙️ Setup and Installation
 
 1. Clone the repository:
+2. ```bash
    git clone https://github.com/R-I-T-U/Movie-Ticket-Booking-System.git  
    cd Movie-Ticket-Booking-System
+   ```
+3. Create a virtual environment (recommended):
 
-2. Create a virtual environment (recommended):
-
-   For Linux/Mac:  
+   For Linux/Mac:
+   ```bash
    python -m venv venv  
-   source venv/bin/activate  
-
-   For Windows:  
+   source venv/bin/activate
+   ```
+   
+   For Windows:
+   ```bash
    python -m venv venv  
-   source venv\Scripts\activate  
+   source venv\Scripts\activate
+   ```
 
-3. Install dependencies:  
+5. Install dependencies:
+   ```bash
    pip install -r requirements/base.txt
+   ```
 
-4. Set up environment variables:  
-   Create a `.env` file in the root directory and configure the required environment variables:
-   DATABASE_URL=your_database_url SECRET_KEY=your_secret_key ACCESS_TOKEN_EXPIRE_MINUTES=30
-5. Run database migrations:  
-alembic upgrade head
+6. Set up environment variables:  
+   DATABASE_URL=your_database_url
+   
+9. Run database migrations:
+    ```bash
+    alembic upgrade head
+    ```
 
-6. Create an admin user:  
-python -m scripts.create_admin
-
+11. Create an admin user:
+    ```bash
+    python -m scripts.create_admin
+    ```
+    
 ---
 
 ## ▶️ Steps to Run the Application
 
-1. Start the FastAPI server:  
-uvicorn app.main:app --reload
+1. Start the FastAPI server:
+   ```bash
+   fastapi dev app/main.py
+   ```
 
-2. Access the backend:  
+3. Access the backend:  
 - API Base URL: http://localhost:8000  
 - Swagger Documentation: http://localhost:8000/docs
 
-3. Access the frontend (if applicable):  
-http://localhost:5500/frontend/index.html
+3. Access the frontend:  
+-http://localhost:5500/frontend/index.html
 
 ---
 
-## 🐍 Python Version and Libraries Used
+## Python Version and Libraries Used
 
 ### Python Version
 - Python 3.8+
@@ -101,11 +114,6 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 - API Base URL: http://127.0.0.1:8000  
 - API Docs: http://127.0.0.1:8000/docs
 
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
 
 ---
 
