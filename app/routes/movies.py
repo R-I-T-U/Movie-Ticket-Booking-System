@@ -5,7 +5,7 @@ from typing import List
 from app import models, schemas
 from app.database import get_db
 from app.auth import get_current_admin_user, get_current_user  
-from app.services.movie_service import get_movies, get_movie, create_movie, update_movie, deactivate_movie
+from app.services.movie_service import delete_movie, get_movies, get_movie, create_movie, update_movie, deactivate_movie
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
@@ -60,21 +60,23 @@ async def update_movie_endpoint(
             detail="Failed to update movie"
         )
 
-@router.delete("/{movie_id}", status_code=status.HTTP_200_OK)
-async def delete_movie_endpoint(
-    movie_id: int, 
-    current_user: models.User = Depends(get_current_admin_user), 
+@router.patch("/{movie_id}/deactivate", response_model=schemas.Movie)
+async def deactivate_movie_endpoint(
+    movie_id: int,
+    current_user: models.User = Depends(get_current_admin_user),
     db: Session = Depends(get_db)
 ):
     if movie_id <= 0:
         raise HTTPException(status_code=400, detail="Invalid movie ID")
-    try:
-        result = deactivate_movie(movie_id, db)
-        return {"message": "Movie deleted successfully"}
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete movie"
-        )
+    return deactivate_movie(movie_id, db)
+
+@router.delete("/{movie_id}")
+async def delete_movie_endpoint(
+    movie_id: int,
+    current_user: models.User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    if movie_id <= 0:
+        raise HTTPException(status_code=400, detail="Invalid movie ID")
+    result = delete_movie(movie_id, db)
+    return {"message": "Movie deleted successfully"}

@@ -2,7 +2,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from fastapi import HTTPException, status
-from datetime import timedelta
+from datetime import datetime, timedelta
 from app import models, schemas
 
 def create_showtime(showtime_data: schemas.ShowtimeCreate, db: Session):
@@ -59,7 +59,7 @@ def update_showtime(showtime_id: int, showtime_data: schemas.ShowtimeCreate, db:
     db_showtime = db.query(models.Showtime).filter(models.Showtime.id == showtime_id).first()
     
     if not db_showtime:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Showtime not found")
+        raise HTTPException(status_code=404, detail="Showtime not found")
     
     movie = db.query(models.Movie).filter(
         models.Movie.id == showtime_data.movie_id,
@@ -67,22 +67,41 @@ def update_showtime(showtime_id: int, showtime_data: schemas.ShowtimeCreate, db:
     ).first()
     
     if not movie:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+        raise HTTPException(status_code=404, detail="Movie not found")
     
     end_time = showtime_data.start_time + timedelta(minutes=movie.duration)
     
-    if showtime_data.total_seats != db_showtime.total_seats:
-        seats_diff = showtime_data.total_seats - db_showtime.total_seats
-        db_showtime.available_seats += seats_diff
+    # Store original values for comparison
+    original_total_seats = db_showtime.total_seats
+    original_available_seats = db_showtime.available_seats
     
+    # Update all fields except seats
     for key, value in showtime_data.model_dump().items():
-        if key != 'total_seats':
+        if key not in ['total_seats', 'available_seats']:
             setattr(db_showtime, key, value)
+    
+    # Handle total seats change
+    if showtime_data.total_seats != original_total_seats:
+        # Calculate how many seats are currently booked
+        booked_seats = original_total_seats - original_available_seats
+        
+        # Update total seats
+        db_showtime.total_seats = showtime_data.total_seats
+        
+        # Recalculate available seats (total - booked)
+        db_showtime.available_seats = showtime_data.total_seats - booked_seats
+        
+        # Ensure available seats doesn't go negative
+        if db_showtime.available_seats < 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot reduce total seats below currently booked seats"
+            )
     
     db_showtime.end_time = end_time
     db.commit()
     db.refresh(db_showtime)
-    return db_showtime 
+    return db_showtime
 
 def get_showtime(db: Session, showtime_id: int, is_admin: bool = False):
     query = db.query(models.Showtime)
@@ -103,20 +122,27 @@ def get_all_showtimes(db: Session, skip: int = 0, limit: int = 100, is_admin: bo
     
     return query.offset(skip).limit(limit).all()
 
+
 def deactivate_showtime(showtime_id: int, db: Session):
     db_showtime = db.query(models.Showtime).filter(models.Showtime.id == showtime_id).first()
     
     if not db_showtime:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Showtime not found")
     
+    # Check if showtime has completed (end time has passed)
+    current_time = datetime.now(db_showtime.end_time.tzinfo)
+    has_completed = current_time > db_showtime.end_time
+    
+    # Check for active bookings (only "completed" status bookings matter for active showtimes)
     active_booking_exists = any(
         booking.status == "completed" for booking in db_showtime.bookings
     )
     
-    if active_booking_exists:
+    # Allow deactivation if showtime has completed OR there are no active bookings
+    if not has_completed and active_booking_exists:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Cannot deactivate showtime. There are active bookings for it."
+            detail="Cannot deactivate showtime. There are active bookings and showtime hasn't completed yet."
         )
 
     db_showtime.is_active = False
@@ -130,15 +156,26 @@ def delete_showtime(showtime_id: int, db: Session):
     if not db_showtime:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Showtime not found")
     
-    active_booking_exists = bool(db_showtime.bookings)
+    # Check if showtime has completed (end time has passed)
+    current_time = datetime.now(db_showtime.end_time.tzinfo)
+    has_completed = current_time > db_showtime.end_time
     
-    if active_booking_exists:
+    # Check if showtime is inactive
+    is_inactive = not db_showtime.is_active
+    
+    # Check for any bookings
+    has_any_bookings = bool(db_showtime.bookings)
+    
+    # Allow deletion if:
+    # 1. Showtime is inactive OR has completed, AND
+    # 2. There are no bookings at all
+    if (is_inactive or has_completed) and not has_any_bookings:
+        # Safe to delete
+        db.delete(db_showtime)
+        db.commit()
+        return db_showtime
+    else:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Cannot delete showtime. There are bookings for it."
+            detail="Cannot delete showtime. It must be either inactive or completed, and have no bookings."
         )
-
-    db.delete(db_showtime)
-    db.commit()
-    
-    return db_showtime

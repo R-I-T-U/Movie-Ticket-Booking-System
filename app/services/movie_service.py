@@ -77,6 +77,7 @@ def deactivate_movie(movie_id: int, db: Session):
             detail="Movie not found"
         )
     
+    # Check if there are any active showtimes for this movie
     active_showtimes = db.query(models.Showtime).filter(
         models.Showtime.movie_id == movie_id,
         models.Showtime.is_active == True
@@ -89,5 +90,29 @@ def deactivate_movie(movie_id: int, db: Session):
         )
     
     db_movie.is_active = False
+    db.commit()
+    return db_movie
+
+def delete_movie(movie_id: int, db: Session):
+    db_movie = db.query(models.Movie).filter(models.Movie.id == movie_id).first()
+    
+    if not db_movie:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Movie not found"
+        )
+    
+    # Check if there are ANY showtimes associated with this movie (active or inactive)
+    any_showtimes = db.query(models.Showtime).filter(
+        models.Showtime.movie_id == movie_id
+    ).first()
+    
+    if any_showtimes:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete movie. There are showtimes associated with this movie."
+        )
+    
+    db.delete(db_movie)
     db.commit()
     return db_movie

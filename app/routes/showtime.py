@@ -5,7 +5,7 @@ from typing import List
 from app import models, schemas
 from app.database import get_db
 from app.auth import get_current_admin_user, get_current_user 
-from app.services.showtime_service import get_all_showtimes, create_showtime, get_showtime, update_showtime, delete_showtime
+from app.services.showtime_service import deactivate_showtime, get_all_showtimes, create_showtime, get_showtime, update_showtime, delete_showtime
 
 router = APIRouter(prefix="/showtimes", tags=["showtimes"]) 
 
@@ -69,3 +69,14 @@ async def delete_showtime_endpoint(
         raise HTTPException(status_code=400, detail="Invalid showtime ID")
     result = delete_showtime(showtime_id, db)
     return {"message": "Showtime deleted successfully"}
+
+@router.patch("/{showtime_id}/deactivate")
+async def deactivate_showtime_endpoint(
+    showtime_id: int,
+    current_user: models.User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    if showtime_id <= 0:
+        raise HTTPException(status_code=400, detail="Invalid showtime ID")
+    result = deactivate_showtime(showtime_id, db)
+    return {"message": "Showtime deactivated successfully"}
