@@ -61,7 +61,7 @@ def cancel_booking(booking_id: int, current_user: models.User, db: Session):
     if not booking:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Booking not found"
+            detail="You can cancel only your own bookings"
         )
     
     if booking.status == "cancelled":
@@ -111,7 +111,7 @@ def delete_booking(booking_id: int, current_user: models.User, db: Session):
     if not booking:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Booking not found"
+            detail="You can only delete your own bookings"
         )
     
     showtime = db.query(models.Showtime).filter(

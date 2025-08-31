@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Movie Ticket Booking System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="container row" style="justify-content: space-between;">
+      <h1>🎬 Movie Ticket Booking System API - Test</h1>
+      <div class="row">
+        <span id="authStatus" class="chip">Not authenticated</span>
+        <button class="btn ghost" id="logoutBtn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- AUTH SECTION -->
+    <section class="card" id="authCard">
+      <h2>Authentication</h2>
+      <div class="toolbar">
+        <div class="inline">
+          <label>Base URL</label>
+          <input id="baseUrl" placeholder="http://localhost:8000" value="http://localhost:8000" />
+        </div>
+        <button class="btn" onclick="saveBaseUrl()">Save</button>
+      </div>
+      <div class="grid cols-2">
+        <div>
+          <h3>Register</h3>
+          <div class="two">
+            <input id="reg_username" placeholder="Username" />
+            <input id="reg_email" placeholder="email@example.com" />
+          </div>
+          <div class="two">
+            <input id="reg_fullname" placeholder="Full name" />
+            <input id="reg_password" placeholder="Password" type="password" />
+          </div>
+          <button class="btn primary" onclick="register()">Create account</button>
+          <div id="reg_out" class="muted" style="margin-top: 8px;"></div>
+        </div>
+        <div>
+          <h3>Login</h3>
+          <div class="two">
+            <input id="login_username" placeholder="Username" />
+            <input id="login_password" placeholder="Password" type="password" />
+          </div>
+          <button class="btn primary" onclick="login()">Get token</button>
+          <div class="two" style="margin-top: 8px;">
+            <input id="token" placeholder="Access token" />
+            <button class="btn" onclick="setTokenFromInput()">Use token</button>
+          </div>
+          <small class="muted">Uses OAuth2PasswordRequestForm: <code>username</code> and <code>password</code>.</small>
+          <div id="login_out" class="muted" style="margin-top: 8px;"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="container">
+    <!-- MOVIES SECTION -->
+    <section class="card">
+      <h2>Movies (admin for write)</h2>
+      <div class="toolbar">
+        <div class="inline">
+          <label>Query</label>
+          <input id="movies_skip" type="number" value="0" style="width: 90px;" /> 
+          <input id="movies_limit" type="number" value="50" style="width: 90px;" />
+          <button class="btn" onclick="loadMovies()">Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Genre</th>
+            <th>Duration</th>
+            <th>Active</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="movies_tbody"></tbody>
+      </table>
+      <hr />
+      <h3>Create / Update</h3>
+      <div class="three">
+        <input id="mv_id" placeholder="ID (for update)" />
+        <input id="mv_title" placeholder="Title" />
+        <input id="mv_genre" placeholder="Genre" />
+      </div>
+      <div class="two" style="margin-top: 8px;">
+        <input id="mv_duration" type="number" placeholder="Duration (min)" />
+        <input id="mv_description" placeholder="Description (optional)" />
+      </div>
+      <div class="row" style="margin-top: 8px;">
+        <button class="btn primary" onclick="createMovie()">Create</button>
+        <button class="btn" onclick="updateMovie()">Update</button>
+      </div>
+      <div id="movies_out" class="muted" style="margin-top: 8px;"></div>
+    </section>
+    </div>
+
+  <div class="container">
+    <!-- SHOWTIMES SECTION -->
+    <section class="card">
+      <div class="toolbar">
+      <div class="inline">
+        <h2>Showtimes (admin for write)</h2>
+        <button class="btn" onclick="loadShowtimes()">Refresh</button>
+      </div>
+    </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Movie ID</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Total</th>
+            <th>Avail</th>
+            <th>Active</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="st_tbody"></tbody>
+      </table>
+      <hr />
+      <h3>Create / Update</h3>
+      <div class="three">
+        <input id="st_id" placeholder="ID (for update)" />
+        <input id="st_movie_id" placeholder="Movie ID" />
+        <input id="st_start" type="datetime-local" />
+      </div>
+      <div class="three" style="margin-top: 8px;">
+        <input id="st_total" type="number" placeholder="Total seats" />
+      </div>
+      <div class="row" style="margin-top: 8px;">
+        <button class="btn primary" onclick="createShowtime()">Create</button>
+        <button class="btn" onclick="updateShowtime()">Update</button>
+      </div>
+      <div id="st_out" class="muted" style="margin-top: 8px;"></div>
+    </section>
+  </div>
+
+  <div class="container">
+    <!-- BOOKINGS SECTION -->
+    <section class="card">
+      <div class="toolbar">
+        <div class="inline">
+          <h2>Bookings</h2>
+          <button class="btn" onclick="loadBookings()">Refresh</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Seats</th>
+            <th>Status</th>
+            <th>Booking Time</th>
+            <th>User ID</th>
+            <th>Showtime ID</th>
+            <th>Movie ID</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="bookings_tbody"></tbody>
+      </table>
+      <hr />
+      <h3>Create</h3>
+      <div class="three">
+        <input id="bk_id" placeholder="ID (for update)" />
+        <input id="bk_showtime_id" placeholder="Showtime ID" type="number" />
+        <input id="bk_seats" placeholder="Number of Seats" type="number" />
+      </div>
+      <div class="row" style="margin-top: 8px;">
+        <button class="btn primary" onclick="createBooking()">Create</button>
+        <button class="btn danger" onclick="cancelBooking()">Cancel</button>
+      </div>
+      <div id="bookings_out" class="muted" style="margin-top: 8px;"></div>
+    </section>
+    
+  </div>
+
+  <div class="container">
+    <!-- RAW RESPONSE SECTION -->
+    <section class="card">
+      <h2>Raw Response</h2>
+      <code class="block" id="raw_out">(responses appear here)</code>
+    </section>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
