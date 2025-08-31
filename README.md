@@ -5,6 +5,8 @@ A **Movie Ticket Booking System** built with **FastAPI**. This system allows use
 Hosted URL:
 https://movie-ticket-booking-system-by-season.netlify.app/
 
+Contact me for admin credentials
+
 ---
 
 ## 📌 Prerequisites
