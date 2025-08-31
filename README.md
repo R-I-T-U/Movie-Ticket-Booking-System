@@ -70,11 +70,11 @@ Ensure you have the following installed before setting up:
 ## ▶️ Steps to Run the Application
 
 1. Start the FastAPI server:
-- Make sure you are in the Movie-Ticket-Booking-System directory in your terminal.
-- Make sure your virtual environment is activated (if you have one set up).
    ```bash
    fastapi dev app/main.py
    ```
+- Make sure you are in the Movie-Ticket-Booking-System directory in your terminal.
+- Make sure your virtual environment is activated (if you have one set up).
 
 2. Access the backend:  
 - API Base URL: http://localhost:8000  
@@ -82,6 +82,7 @@ Ensure you have the following installed before setting up:
 
 3. Access the frontend:  
 - Option 1: Simply run the HTML file by Live Server or open the file directly in your browser.
+  
 - Option 2: Run an HTTP server on port 3000 using this command:
   ```bash
   python -m http.server 3000
