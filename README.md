@@ -2,11 +2,12 @@
 
 A **Movie Ticket Booking System** built with **FastAPI**. This system allows users to browse movies, book tickets, and provides an admin panel to manage movies and showtimes.
 
+<!--
 Hosted URL:
 https://movie-ticket-booking-system-by-season.netlify.app/
 
 (For the admin credentials to my hosted web application, please contact me directly.)
-
+-->
 ---
 
 ## 📌 Prerequisites
